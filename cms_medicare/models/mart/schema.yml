@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: fct_prescriber_anomaly_input
+    description: "Final mart table ready for anomaly detection model"
+    columns:
+      - name: prescriber_npi
+        description: "Unique prescriber identifier"
+        tests:
+          - not_null
+          - unique
+      - name: total_drug_cost
+        description: "Total drug cost paid by Medicare"
+        tests:
+          - not_null
+      - name: total_claims
+        description: "Total number of claims"
+        tests:
+          - not_null

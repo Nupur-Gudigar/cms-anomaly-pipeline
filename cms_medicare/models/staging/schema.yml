@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_partd_prescribers
+    description: "Cleaned and renamed Medicare Part D prescriber data"
+    columns:
+      - name: prescriber_npi
+        description: "Unique prescriber identifier"
+        tests:
+          - not_null
+      - name: total_drug_cost
+        description: "Total drug cost paid by Medicare"
+        tests:
+          - not_null
+      - name: total_claims
+        description: "Total number of claims"
+        tests:
+          - not_null

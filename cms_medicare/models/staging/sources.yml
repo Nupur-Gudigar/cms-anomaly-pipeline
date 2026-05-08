@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw
+    database: CMS_MEDICARE
+    schema: RAW
+    tables:
+      - name: partd_prescribers
+        description: "Raw Medicare Part D prescriber data from CMS 2023"
+        columns:
+          - name: PRSCRBR_NPI
+            description: "Unique prescriber identifier"
+          - name: TOT_DRUG_CST
+            description: "Total drug cost paid by Medicare"
+          - name: TOT_CLMS
+            description: "Total number of claims"
+          - name: TOT_BENES
+            description: "Total number of beneficiaries"
