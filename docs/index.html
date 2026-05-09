@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS Medicare Anomaly Detection — Nupur Gudigar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --text:#0f0f0f;
+  --muted:#6b7280;
+  --accent:#1a56a0;
+  --border:#e5e7eb;
+  --bg:#ffffff;
+  --surface:#f9fafb;
+  --red:#dc2626;
+  --red-light:#fee2e2;
+  --blue-light:#eff6ff;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --text:#f3f4f6;
+    --muted:#9ca3af;
+    --accent:#60a5fa;
+    --border:#374151;
+    --bg:#111827;
+    --surface:#1f2937;
+    --red:#f87171;
+    --red-light:#450a0a;
+    --blue-light:#1e3a5f;
+  }
+}
+
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ── Layout ── */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.1rem 2.5rem;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:100;
+}
+.nav-left{
+  font-size:10px;font-weight:600;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.nav-right{display:flex;gap:2rem;align-items:center}
+.nav-right a{
+  font-size:11px;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;text-decoration:none;color:var(--muted);
+  transition:color 0.15s;
+}
+.nav-right a:hover{color:var(--text)}
+
+.wrapper{max-width:1140px;margin:0 auto;padding:0 2.5rem 6rem}
+
+
+/* ── Hero ── */
+.hero{padding:5rem 0 4rem;border-bottom:1px solid var(--border)}
+.hero-eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;
+}
+.hero-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(42px,6vw,72px);font-weight:400;
+  line-height:1.05;color:var(--text);margin-bottom:1.5rem;
+}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-body{
+  font-size:16px;font-weight:300;line-height:1.85;
+  color:var(--muted);max-width:600px;margin-bottom:2.5rem;
+}
+.tech-stack{display:flex;flex-wrap:wrap;gap:8px}
+.tech-pill{
+  font-size:10px;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;padding:5px 12px;
+  border:1px solid var(--border);border-radius:2px;color:var(--muted);
+  background:transparent;
+}
+
+/* ── Section ── */
+.section{padding:4rem 0;border-bottom:1px solid var(--border)}
+.section:last-child{border-bottom:none}
+.section-label{
+  font-size:10px;font-weight:600;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--accent);
+  display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;
+}
+.section-label::after{
+  content:'';flex:1;height:1px;background:var(--accent);opacity:0.3;
+}
+.section-headline{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(24px,3.5vw,36px);font-weight:400;
+  line-height:1.2;color:var(--text);margin-bottom:10px;
+}
+.section-body{
+  font-size:14px;font-weight:300;line-height:1.85;
+  color:var(--muted);max-width:620px;margin-bottom:2rem;
+}
+
+/* ── Metrics ── */
+.metrics-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;margin-top:2rem;
+}
+.metric{
+  padding:1.75rem 1.5rem;
+  border-right:1px solid var(--border);
+}
+.metric:last-child{border-right:none}
+.metric-label{
+  font-size:10px;font-weight:600;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:12px;
+}
+.metric-value{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:42px;font-weight:400;color:var(--text);
+  line-height:1;margin-bottom:8px;
+}
+.metric-sub{font-size:12px;color:var(--accent);font-weight:400}
+
+/* ── Charts ── */
+.chart-wrap{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:4px;padding:1.75rem;margin-bottom:1.5rem;
+}
+.chart-title{
+  font-size:13px;font-weight:500;letter-spacing:0.04em;
+  color:var(--text);margin-bottom:4px;
+}
+.chart-sub{
+  font-size:12px;font-weight:300;color:var(--muted);margin-bottom:1.25rem;
+}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.legend{display:flex;gap:1.5rem;margin-top:1rem}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── Filters ── */
+.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.filter-group label{
+  display:block;font-size:10px;font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.filter-group select{
+  width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;
+  border:1px solid var(--border);border-radius:3px;
+  background:var(--bg);color:var(--text);cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:32px;
+}
+.filter-group select:focus{outline:none;border-color:var(--accent)}
+
+/* ── Table ── */
+.table-controls{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;
+}
+.search-input{
+  padding:8px 14px;font-size:13px;font-family:'Inter',sans-serif;
+  border:1px solid var(--border);border-radius:3px;
+  background:var(--bg);color:var(--text);width:280px;
+}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.table-count{font-size:12px;color:var(--muted);font-weight:300}
+.table-wrap{
+  border:1px solid var(--border);border-radius:4px;overflow:hidden;
+}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--surface)}
+th{
+  padding:10px 14px;font-size:10px;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--muted);text-align:left;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+  cursor:pointer;user-select:none;
+}
+th:hover{color:var(--text)}
+th .sort-arrow{margin-left:4px;opacity:0.4;font-size:9px}
+th.sorted .sort-arrow{opacity:1;color:var(--accent)}
+td{
+  padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)}
+.badge-anom{
+  display:inline-block;font-size:10px;font-weight:500;
+  letter-spacing:0.04em;padding:2px 8px;border-radius:2px;
+  background:var(--red-light);color:var(--red);
+}
+.specialty-text{
+  font-size:11px;color:var(--muted);font-weight:300;
+}
+.no-results{
+  padding:3rem;text-align:center;
+  font-size:13px;color:var(--muted);
+}
+
+/* ── Footer ── */
+.footer{
+  padding:3rem 0 2rem;
+  display:flex;justify-content:space-between;
+  align-items:flex-start;flex-wrap:wrap;gap:2rem;
+  border-top:1px solid var(--border);margin-top:4rem;
+}
+.footer-left{}
+.footer-name{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:20px;font-weight:400;color:var(--text);margin-bottom:6px;
+}
+.footer-desc{
+  font-size:12px;font-weight:300;color:var(--muted);
+  line-height:1.8;max-width:420px;
+}
+.footer-links{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.footer-links a{
+  font-size:11px;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;text-decoration:none;color:var(--muted);
+  transition:color 0.15s;
+}
+.footer-links a:hover{color:var(--text)}
+
+/* ── Loading ── */
+#loading{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  z-index:999;flex-direction:column;gap:1rem;
+}
+.loading-title{
+  font-family:'Playfair Display',serif;
+  font-size:18px;font-weight:400;color:var(--muted);
+}
+.loading-bar{
+  width:200px;height:1px;background:var(--border);overflow:hidden;
+}
+.loading-progress{
+  height:100%;background:var(--accent);
+  animation:progress 1.5s ease-in-out infinite;
+}
+@keyframes progress{
+  0%{width:0;margin-left:0}
+  50%{width:100%;margin-left:0}
+  100%{width:0;margin-left:100%}
+}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .nav{padding:1rem 1.25rem}
+  .wrapper{padding:0 1.25rem 4rem}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(3){border-right:1px solid var(--border)}
+  .two-col{grid-template-columns:1fr}
+  .filter-row{grid-template-columns:1fr}
+  .footer{flex-direction:column}
+  .footer-links{align-items:flex-start}
+  .search-input{width:100%}
+  .table-controls{flex-direction:column;align-items:flex-start}
+}
+
+body.light-mode{
+  --text:#1c1917;
+  --muted:#78716c;
+  --accent:#1a56a0;
+  --border:#d6d3ce;
+  --bg:#f5f3ee;
+  --surface:#eceae4;
+  --red:#b91c1c;
+  --red-light:#fef2f2;
+  --blue-light:#eff6ff;
+}
+
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-title">Loading data...</div>
+  <div class="loading-bar"><div class="loading-progress"></div></div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-left">End-to-End Pipeline &nbsp;·&nbsp; Data Engineering &nbsp;·&nbsp; Machine Learning &nbsp;·&nbsp; Visualization</div>
+  <div class="nav-right">
+  <button id="theme-toggle" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);border-radius:3px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;">Light</button>
+    <a href="https://github.com/Nupur-Gudigar" target="_blank">GitHub</a>
+    <a href="https://github.com/Nupur-Gudigar/cms-anomaly-pipeline" target="_blank">View Repo</a>
+    <a href="https://www.linkedin.com/in/nupur-gudigar" target="_blank">LinkedIn</a>
+    <a href="mailto:nupurgudigar.tech@gmail.com">Email</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">CMS Medicare Part D &nbsp;·&nbsp; 2023 &nbsp;·&nbsp; 500,000 Claims</div>
+    <h1 class="hero-title">Detecting <em>anomalous</em><br>prescriber billing<br>patterns</h1>
+    <p class="hero-body">
+      An end-to-end data engineering pipeline that loads real Medicare Part D
+      claims data into Snowflake, transforms it with dbt across three layers,
+      and applies Isolation Forest machine learning to surface the top 0.5% of
+      statistically suspicious prescribers across 20,935 providers nationwide.
+    </p>
+    <div class="tech-stack">
+      <span class="tech-pill">Snowflake</span>
+      <span class="tech-pill">dbt</span>
+      <span class="tech-pill">Isolation Forest</span>
+      <span class="tech-pill">Great Expectations</span>
+      <span class="tech-pill">Apache Airflow</span>
+      <span class="tech-pill">Python</span>
+    </div>
+  </section>
+
+  <!-- At a glance -->
+  <section class="section">
+    <div class="section-label">01 &nbsp;/&nbsp; At a glance</div>
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-label">Prescribers analyzed</div>
+        <div class="metric-value" id="m-total">—</div>
+        <div class="metric-sub">2023 dataset</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Anomalies detected</div>
+        <div class="metric-value" id="m-anom">—</div>
+        <div class="metric-sub">flagged for review</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Anomaly rate</div>
+        <div class="metric-value" id="m-rate">—</div>
+        <div class="metric-sub">within 0.6% threshold</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Medicare spend</div>
+        <div class="metric-value" id="m-spend">—</div>
+        <div class="metric-sub">total analyzed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scatter -->
+  <section class="section">
+    <div class="section-label">02 &nbsp;/&nbsp; Explore</div>
+    <h2 class="section-headline">Every dot is a doctor.</h2>
+    <p class="section-body">
+      Each of the 20,935 prescribers plotted by total claim volume against total
+      drug cost. Normal prescribers cluster together. Anomalous ones — shown in
+      red — sit far from the group, isolated by the algorithm.
+      Use the filters to explore by state or specialty.
+    </p>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Filter by state</label>
+        <select id="filter-state"><option value="">All states</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Filter by specialty</label>
+        <select id="filter-specialty"><option value="">All specialties</option></select>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Total claims vs total drug cost</div>
+      <div class="chart-sub">Hover over any point to see prescriber details</div>
+      <canvas id="scatter-chart" height="400"></canvas>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#93c5fd"></div>
+          Normal prescriber
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#dc2626"></div>
+          Flagged anomaly
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Distribution -->
+  <section class="section">
+    <div class="section-label">03 &nbsp;/&nbsp; Distribution</div>
+    <h2 class="section-headline">Where anomalies concentrate.</h2>
+    <p class="section-body">
+      Anomalies are not evenly distributed across states or cost ranges.
+      High-population states produce more flagged cases. Anomalous prescribers
+      cluster at the extreme high end of drug cost — billing far beyond their peers.
+    </p>
+    <div class="two-col">
+      <div class="chart-wrap">
+        <div class="chart-title">Anomalies by state</div>
+        <div class="chart-sub">Top states by flagged prescriber count</div>
+        <canvas id="state-chart" height="300"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">Drug cost distribution</div>
+        <div class="chart-sub">Normal vs anomalous prescribers</div>
+        <canvas id="hist-chart" height="300"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specialty -->
+  <section class="section">
+    <div class="section-label">04 &nbsp;/&nbsp; By specialty</div>
+    <h2 class="section-headline">Specialty context matters.</h2>
+    <p class="section-body">
+      An oncologist billing $10,000 per claim may be entirely normal — cancer
+      drugs are expensive. The same cost from a family practice doctor is a red
+      flag. Anomaly rates vary significantly across specialties.
+    </p>
+    <div class="chart-wrap">
+      <div class="chart-title">Anomaly rate by specialty</div>
+      <div class="chart-sub">Specialties with 50+ prescribers · sorted by anomaly rate</div>
+      <canvas id="specialty-chart" height="280"></canvas>
+    </div>
+  </section>
+
+  <!-- Findings -->
+  <section class="section">
+    <div class="section-label">05 &nbsp;/&nbsp; Findings</div>
+    <h2 class="section-headline" id="findings-headline">105 prescribers flagged.</h2>
+    <p class="section-body">
+      Sorted by anomaly severity — the most statistically isolated prescribers
+      appear first. A lower anomaly score indicates greater isolation from the
+      normal cluster. These cases warrant human investigation before
+      any conclusions are drawn.
+    </p>
+    <div class="table-controls">
+      <input
+        type="text"
+        class="search-input"
+        id="table-search"
+        placeholder="Search by name, state, or specialty..."
+      >
+      <div class="table-count" id="table-count"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="last_name">Name <span class="sort-arrow">↕</span></th>
+            <th data-col="specialty">Specialty <span class="sort-arrow">↕</span></th>
+            <th data-col="state">State <span class="sort-arrow">↕</span></th>
+            <th data-col="total_claims">Claims <span class="sort-arrow">↕</span></th>
+            <th data-col="total_drug_cost">Drug cost <span class="sort-arrow">↕</span></th>
+            <th data-col="avg_cost_per_claim">Avg / claim <span class="sort-arrow">↕</span></th>
+            <th data-col="unique_drugs_prescribed">Drugs <span class="sort-arrow">↕</span></th>
+            <th data-col="anomaly_score_raw">Score <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="footer-name">Nupur Gudigar</div>
+      <div class="footer-desc">
+        Data engineer building end-to-end pipelines on modern cloud stacks.<br>
+        Data: CMS Medicare Part D 2023 &nbsp;·&nbsp; Model: Isolation Forest<br>
+        Stack: Snowflake · dbt · Airflow · Great Expectations · Python<br>
+        Data source: <a href="https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug" target="_blank" style="color:var(--accent);text-decoration:none">CMS Medicare Part D Prescribers →</a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Nupur-Gudigar" target="_blank">GitHub →</a>
+      <a href="https://www.linkedin.com/in/nupur-gudigar" target="_blank">LinkedIn →</a>
+      <a href="mailto:nupurgudigar.tech@gmail.com">nupurgudigar.tech@gmail.com</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ── Helpers ───────────────────────────────────────────────────────────
+const fmt = {
+  num: n => Number(n).toLocaleString('en-US', {maximumFractionDigits:0}),
+  usd: n => '$' + Number(n).toLocaleString('en-US', {maximumFractionDigits:0}),
+  pct: n => Number(n).toFixed(2) + '%',
+  score: n => Number(n).toFixed(4)
+}
+
+const ACCENT = '#1a56a0'
+const BLUE   = '#93c5fd'
+const RED    = '#dc2626'
+const MUTED  = '#9ca3af'
+const BORDER = getComputedStyle(document.documentElement)
+               .getPropertyValue('--border').trim() || '#e5e7eb'
+
+// ── Chart defaults ────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Inter', sans-serif"
+Chart.defaults.color = MUTED
+
+// ── State ─────────────────────────────────────────────────────────────
+let DATA = null
+let filteredPrescribers = []
+let sortCol = 'anomaly_score_raw'
+let sortAsc = true
+let searchTerm = ''
+
+// ── Load data ─────────────────────────────────────────────────────────
+fetch('data.json')
+  .then(r => r.json())
+  .then(data => {
+    DATA = data
+    document.getElementById('loading').style.display = 'none'
+    init()
+  })
+  .catch(e => {
+    document.getElementById('loading').innerHTML =
+      '<div style="color:#dc2626;font-family:Inter,sans-serif;font-size:14px">Failed to load data.json</div>'
+  })
+
+function init() {
+  renderMetrics()
+  populateFilters()
+  renderScatter()
+  renderStateChart()
+  renderHistChart()
+  renderSpecialtyChart()
+  renderTable()
+  setupFilters()
+  setupSearch()
+  setupSort()
+}
+
+// ── Metrics ───────────────────────────────────────────────────────────
+function renderMetrics() {
+  const m = DATA.meta
+  document.getElementById('m-total').textContent = fmt.num(m.total_prescribers)
+  document.getElementById('m-anom').textContent  = fmt.num(m.total_anomalies)
+  document.getElementById('m-rate').textContent  = fmt.pct(m.anomaly_rate)
+  document.getElementById('m-spend').textContent = '$' + (m.total_spend / 1e9).toFixed(2) + 'B'
+}
+
+// ── Filters ───────────────────────────────────────────────────────────
+function populateFilters() {
+  const states = [...new Set(DATA.prescribers.map(p => p.state))]
+    .filter(Boolean).sort()
+  const stateEl = document.getElementById('filter-state')
+  states.forEach(s => {
+    const o = document.createElement('option')
+    o.value = s; o.textContent = s
+    stateEl.appendChild(o)
+  })
+
+  const specs = [...new Set(DATA.prescribers.map(p => p.specialty))]
+    .filter(Boolean).sort()
+  const specEl = document.getElementById('filter-specialty')
+  specs.forEach(s => {
+    const o = document.createElement('option')
+    o.value = s; o.textContent = s
+    specEl.appendChild(o)
+  })
+}
+
+function getFiltered() {
+  const state = document.getElementById('filter-state').value
+  const spec  = document.getElementById('filter-specialty').value
+  return DATA.prescribers.filter(p => {
+    if (state && p.state !== state) return false
+    if (spec  && p.specialty !== spec) return false
+    return true
+  })
+}
+
+function setupFilters() {
+  document.getElementById('filter-state').addEventListener('change', () => {
+    updateScatter()
+  })
+  document.getElementById('filter-specialty').addEventListener('change', () => {
+    updateScatter()
+  })
+}
+
+// ── Scatter ───────────────────────────────────────────────────────────
+let scatterChart = null
+
+function buildScatterData(prescribers) {
+  const normal = prescribers
+    .filter(p => p.is_anomaly === 0)
+  const sampled = normal.length > 3000
+    ? normal.filter((_, i) => i % Math.ceil(normal.length / 3000) === 0)
+    : normal
+  const anomalous = prescribers.filter(p => p.is_anomaly === 1)
+
+  return {
+    normal: sampled.map(p => ({
+      x: p.total_claims,
+      y: p.total_drug_cost,
+      label: `${p.first_name} ${p.last_name}`,
+      specialty: p.specialty,
+      state: p.state,
+      cost: p.avg_cost_per_claim
+    })),
+    anomalous: anomalous.map(p => ({
+      x: p.total_claims,
+      y: p.total_drug_cost,
+      label: `${p.first_name} ${p.last_name}`,
+      specialty: p.specialty,
+      state: p.state,
+      cost: p.avg_cost_per_claim
+    }))
+  }
+}
+
+function renderScatter() {
+  const prescribers = getFiltered()
+  const {normal, anomalous} = buildScatterData(prescribers)
+  const ctx = document.getElementById('scatter-chart').getContext('2d')
+  scatterChart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        {
+          label: 'Normal',
+          data: normal,
+          backgroundColor: 'rgba(147,197,253,0.5)',
+          pointRadius: 3,
+          pointHoverRadius: 5
+        },
+        {
+          label: 'Anomaly',
+          data: anomalous,
+          backgroundColor: 'rgba(220,38,38,0.8)',
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = ctx.raw
+              return [
+                `${d.label}`,
+                `Specialty: ${d.specialty}`,
+                `State: ${d.state}`,
+                `Claims: ${fmt.num(d.x)}`,
+                `Drug cost: ${fmt.usd(d.y)}`,
+                `Avg/claim: ${fmt.usd(d.cost)}`
+              ]
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {display:true, text:'Total claims', color:MUTED, font:{size:11}},
+          grid: {color:'rgba(107,114,128,0.1)'},
+          ticks: {font:{size:11}}
+        },
+        y: {
+          title: {display:true, text:'Total drug cost ($)', color:MUTED, font:{size:11}},
+          grid: {color:'rgba(107,114,128,0.1)'},
+          ticks: {
+            font:{size:11},
+            callback: v => '$' + (v/1e6).toFixed(0) + 'M'
+          }
+        }
+      }
+    }
+  })
+}
+
+function updateScatter() {
+  const prescribers = getFiltered()
+  const {normal, anomalous} = buildScatterData(prescribers)
+  scatterChart.data.datasets[0].data = normal
+  scatterChart.data.datasets[1].data = anomalous
+  scatterChart.update()
+}
+
+// ── State chart ───────────────────────────────────────────────────────
+function renderStateChart() {
+  const ctx = document.getElementById('state-chart').getContext('2d')
+  const labels = DATA.state_counts.slice(0,12).map(d => d.state)
+  const values = DATA.state_counts.slice(0,12).map(d => d.count)
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: ACCENT,
+        borderRadius: 2,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {legend:{display:false}},
+      scales: {
+        x: {grid:{color:'rgba(107,114,128,0.1)'}, ticks:{font:{size:11}}},
+        y: {grid:{display:false}, ticks:{font:{size:11}}}
+      }
+    }
+  })
+}
+
+// ── Histogram ─────────────────────────────────────────────────────────
+function renderHistChart() {
+  const ctx = document.getElementById('hist-chart').getContext('2d')
+  const normal = DATA.prescribers.filter(p => p.is_anomaly === 0)
+    .map(p => p.total_drug_cost)
+  const anomalous = DATA.prescribers.filter(p => p.is_anomaly === 1)
+    .map(p => p.total_drug_cost)
+
+  const maxVal = Math.max(...normal, ...anomalous)
+  const bins = 30
+  const binSize = maxVal / bins
+  const binLabels = Array.from({length: bins}, (_, i) =>
+    '$' + ((i * binSize) / 1e6).toFixed(1) + 'M'
+  )
+
+  function toBins(arr) {
+    const counts = new Array(bins).fill(0)
+    arr.forEach(v => {
+      const i = Math.min(Math.floor(v / binSize), bins - 1)
+      counts[i]++
+    })
+    return counts
+  }
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: binLabels,
+      datasets: [
+        {
+          label: 'Normal',
+          data: toBins(normal),
+          backgroundColor: 'rgba(147,197,253,0.6)',
+          borderRadius: 1
+        },
+        {
+          label: 'Anomaly',
+          data: toBins(anomalous),
+          backgroundColor: 'rgba(220,38,38,0.75)',
+          borderRadius: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: {size: 11},
+            boxWidth: 10,
+            boxHeight: 10,
+            padding: 16
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {display: false},
+          ticks: {
+            font: {size: 9},
+            maxTicksLimit: 6,
+            maxRotation: 0
+          }
+        },
+        y: {
+          grid: {color: 'rgba(107,114,128,0.1)'},
+          ticks: {font: {size: 11}}
+        }
+      }
+    }
+  })
+}
+
+// ── Specialty chart ───────────────────────────────────────────────────
+function renderSpecialtyChart() {
+  const ctx = document.getElementById('specialty-chart').getContext('2d')
+  const sorted = [...DATA.specialty_stats]
+    .sort((a, b) => b.anomaly_rate - a.anomaly_rate)
+    .slice(0, 10)
+  const labels = sorted.map(d => d.specialty)
+  const values = sorted.map(d => d.anomaly_rate)
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: values.map(v =>
+          v > 1 ? 'rgba(220,38,38,0.75)' : ACCENT
+        ),
+        borderRadius: 2,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          callbacks: {
+            label: ctx => `Anomaly rate: ${ctx.raw.toFixed(2)}%`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {display: false},
+          ticks: {font: {size: 11}, maxRotation: 30}
+        },
+        y: {
+          grid: {color: 'rgba(107,114,128,0.1)'},
+          ticks: {
+            font: {size: 11},
+            callback: v => v + '%'
+          }
+        }
+      }
+    }
+  })
+}
+
+// ── Table ─────────────────────────────────────────────────────────────
+function getTableData() {
+  const anomalous = DATA.prescribers.filter(p => p.is_anomaly === 1)
+  let filtered = anomalous
+  if (searchTerm) {
+    const s = searchTerm.toLowerCase()
+    filtered = anomalous.filter(p =>
+      (p.last_name||'').toLowerCase().includes(s) ||
+      (p.first_name||'').toLowerCase().includes(s) ||
+      (p.specialty||'').toLowerCase().includes(s) ||
+      (p.state||'').toLowerCase().includes(s)
+    )
+  }
+  filtered.sort((a, b) => {
+    const av = a[sortCol], bv = b[sortCol]
+    if (typeof av === 'number')
+      return sortAsc ? av - bv : bv - av
+    return sortAsc
+      ? String(av).localeCompare(String(bv))
+      : String(bv).localeCompare(String(av))
+  })
+  return filtered
+}
+
+function renderTable() {
+  const data = getTableData()
+  filteredPrescribers = data
+  const tbody = document.getElementById('table-body')
+  document.getElementById('table-count').textContent =
+    `Showing ${data.length} of 105 anomalous prescribers`
+  document.getElementById('findings-headline').textContent =
+    `${data.length} prescriber${data.length !== 1 ? 's' : ''} flagged.`
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="no-results">No results match your search.</div></td></tr>'
+    return
+  }
+
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td>
+        <div style="font-weight:500">${p.last_name}, ${p.first_name}</div>
+      </td>
+      <td><span class="specialty-text">${p.specialty || '—'}</span></td>
+      <td>${p.state || '—'}</td>
+      <td>${fmt.num(p.total_claims)}</td>
+      <td>${fmt.usd(p.total_drug_cost)}</td>
+      <td><span class="badge-anom">${fmt.usd(p.avg_cost_per_claim)}</span></td>
+      <td>${fmt.num(p.unique_drugs_prescribed)}</td>
+      <td style="font-size:11px;color:var(--muted);font-family:'Inter',monospace">
+        ${fmt.score(p.anomaly_score_raw)}
+      </td>
+    </tr>
+  `).join('')
+}
+
+function setupSearch() {
+  document.getElementById('table-search').addEventListener('input', e => {
+    searchTerm = e.target.value
+    renderTable()
+  })
+}
+
+function setupSort() {
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col
+      if (sortCol === col) {
+        sortAsc = !sortAsc
+      } else {
+        sortCol = col
+        sortAsc = true
+      }
+      document.querySelectorAll('th').forEach(t => t.classList.remove('sorted'))
+      th.classList.add('sorted')
+      renderTable()
+    })
+  })
+}
+
+function toggleTheme() {
+  const body = document.body
+  const btn = document.getElementById('theme-toggle')
+  body.classList.toggle('light-mode')
+  btn.textContent = body.classList.contains('light-mode') ? 'Dark' : 'Light'
+}
+</script>
+</body>
+</html>
