@@ -37,6 +37,10 @@
 }
 
 html{font-size:16px;scroll-behavior:smooth}
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
 
 /* ── Layout ── */
@@ -258,17 +262,33 @@ tr:hover td{background:var(--surface)}
 
 /* ── Responsive ── */
 @media(max-width:768px){
-  .nav{padding:1rem 1.25rem}
-  .wrapper{padding:0 1.25rem 4rem}
-  .metrics-grid{grid-template-columns:1fr 1fr}
-  .metric:nth-child(2){border-right:none}
-  .metric:nth-child(3){border-right:1px solid var(--border)}
-  .two-col{grid-template-columns:1fr}
-  .filter-row{grid-template-columns:1fr}
-  .footer{flex-direction:column}
-  .footer-links{align-items:flex-start}
-  .search-input{width:100%}
-  .table-controls{flex-direction:column;align-items:flex-start}
+  html, body { overflow-x:hidden; width:100%; }
+  .nav{ padding:0.75rem 1rem; flex-wrap:nowrap; overflow:hidden; }
+  .nav-left{ display:none; }
+  .nav-right{ gap:0.75rem; overflow-x:auto; flex-shrink:0; }
+  .nav-right a{ font-size:10px; white-space:nowrap; }
+  #theme-toggle{ font-size:10px; padding:3px 7px; white-space:nowrap; }
+  .wrapper{ padding:0 1rem 3rem; width:100%; box-sizing:border-box; }
+  .hero{ padding:2rem 0 1.5rem; }
+  .hero-title{ font-size:32px; word-break:break-word; }
+  .hero-body{ font-size:14px; }
+  .tech-stack{ gap:6px; }
+  .tech-pill{ font-size:9px; padding:4px 8px; }
+  .metrics-grid{ grid-template-columns:1fr 1fr; }
+  .metric{ padding:1rem; }
+  .metric:nth-child(2){ border-right:none; }
+  .metric:nth-child(3){ border-right:1px solid var(--border); }
+  .metric-value{ font-size:28px; }
+  .two-col{ grid-template-columns:1fr; }
+  .filter-row{ grid-template-columns:1fr; }
+  .section-headline{ font-size:24px; word-break:break-word; }
+  .table-wrap{ overflow-x:auto; }
+  table{ min-width:600px; }
+  .footer{ flex-direction:column; }
+  .footer-links{ align-items:flex-start; }
+  .search-input{ width:100%; box-sizing:border-box; }
+  .table-controls{ flex-direction:column; align-items:flex-start; }
+  .chart-wrap{ padding:1rem; }
 }
 
 body.light-mode{
