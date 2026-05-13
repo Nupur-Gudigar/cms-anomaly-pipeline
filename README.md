@@ -1,14 +1,17 @@
 <div align="center">
 
-# CMS Medicare Part D — Anomaly Detection Pipeline
+# CMS Medicare Part D — Anomaly Detection Pipeline 
+
 
 **Detecting suspicious prescriber billing patterns across 20,935 providers using Snowflake, dbt, Isolation Forest, Great Expectations, and Apache Airflow.**
+
 
 [![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=flat&logo=snowflake&logoColor=white)](https://snowflake.com)
 [![dbt](https://img.shields.io/badge/dbt-FF694B?style=flat&logo=dbt&logoColor=white)](https://getdbt.com)
 [![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
 [![Airflow](https://img.shields.io/badge/Airflow_2.8-017CEE?style=flat&logo=apache-airflow&logoColor=white)](https://airflow.apache.org)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
+[![Image of my-views-counter](https://github.com/Nupur-Gudigar/my-views-counter/blob/master/svg/1233311957/badge.svg)](https://github.com/Nupur-Gudigar/my-views-counter/blob/master/readme/1233311957/week.md)
 
 **[→ View Live Dashboard](https://nupur-gudigar.github.io/cms-anomaly-pipeline)**
 &nbsp;&nbsp;|&nbsp;&nbsp;
